@@ -1,4 +1,4 @@
-;; -*- mode: emacs-lisp -*-
+; -*- mode: emacs-lisp -*-
 ;; This file is loaded by Spacemacs at startup.
 ;; It must be stored in your home directory.
 
@@ -23,7 +23,14 @@ values."
      ;; Uncomment some layer names and press <SPC f e R> (Vim style) or
      ;; <M-m f e R> (Emacs style) to install them.
      ;; ----------------------------------------------------------------
-     auto-completion
+     (auto-completion
+      :variables
+      auto-completion-return-key-behavior nil
+      auto-completion-tab-key-behavior 'complete
+      auto-completion-complete-with-key-sequence-delay 0.0
+      auto-completion-enable-help-tooltip t
+      ;; auto-completion-enable-sort-by-usage t
+      )
      ;; better-defaults
      emacs-lisp
      git
@@ -36,7 +43,10 @@ values."
      syntax-checking
      ;; version-control
      ;; intero
-     (haskell :variables haskell-enable-hindent-style "johan-tibell")
+     (haskell
+      :variables
+      haskell-enable-hindent-style "johan-tibell"
+      haskell-completion-backend 'intero)
      javascript
      react
      yaml
@@ -44,12 +54,22 @@ values."
      clojure
      elm
      docker
+     (shell :variables shell-default-shell 'eshell)
+     shell-scripts
+     slack
+     restclient
+     sql
      )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-   dotspacemacs-additional-packages '(writeroom-mode flycheck-flow editorconfig company-flow)
+   dotspacemacs-additional-packages
+   '(writeroom-mode
+     flycheck-flow
+     editorconfig
+     company-flow
+     eww-lnum)
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages '()
    ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
@@ -278,6 +298,21 @@ you should place your code here."
   (eval-after-load 'company
     '(add-to-list 'company-backends 'company-flow))
   (setq-default company-flow-modes '(js-mode js2-mode web-mode react-mode))
+  (add-to-list 'compilation-error-regexp-alist
+               'eslint)
+  (add-to-list 'compilation-error-regexp-alist-alist
+               '(eslint
+                 "\\(/.*\\)\n  \\([[:digit:]]+\\):\\([[:digit:]]+\\)  \\(\\(warning\\)\\|\\(error\\)\\)  \\(.*\\)$"
+                 1 2 3 (4)))
+  (add-to-list 'compilation-error-regexp-alist
+               'flowtype)
+  (add-to-list 'compilation-error-regexp-alist-alist
+               '(flowtype
+                 "\\(.*\\):\\([[:digit:]]+\\)\n \\([[:digit:]]+\\):"
+                 1 2 3))
+  (add-to-list 'auto-mode-alist
+               '("\\.compile.results\\'" . compilation-mode))
+
   ;; (setq-default dotspacemacs-default-font '("Source Code Pro"
   ;;                                           :size 13
   ;;                                           :weight normal
@@ -287,10 +322,11 @@ you should place your code here."
   ;; (customize-set-variable 'intero-package-version "0.1.16")
   ;; (setq golden-ratio-adjust-factor 1.2)
   (setq cider-boot-parameters "repl -s watch refresh")
-  (setq-default dotspacemacs-configuration-layers
-                '(auto-completion
-                  (haskell :variables haskell-completion-backend 'intero)))
+  ;; (setq-default dotspacemacs-configuration-layers
+  ;;               '(auto-completion
+  ;;                 (haskell :variables haskell-completion-backend 'intero)))
   (require 'intero)
+  (add-hook 'haskell-mode-hook 'intero-mode)
   (defun intero-repl-reload ()
     "Reoad the current file in the REPL."
     (interactive)
@@ -302,9 +338,28 @@ you should place your code here."
          (get-buffer-process (current-buffer))
          (concat ":r")))))
   (define-key intero-mode-map (kbd "C-c C-j") 'intero-repl-reload)
-  (add-hook 'haskell-mode-hook 'intero-mode)
-  (setq company-idle-delay 0)
+  (setq haskell-hoogle-command "stack hoogle -- --count=50")
+  ;; (setq company-idle-delay 0)
+
+  (require 'eww-lnum)
+  (eval-after-load "eww"
+    '(progn (define-key eww-mode-map "f" 'eww-lnum-follow)
+            (define-key eww-mode-map "F" 'eww-lnum-universal)))
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   (quote
+    (visual-fill-column emojify circe oauth2 websocket ht purescript-mode org markdown-mode skewer-mode simple-httpd js2-mode haml-mode gitignore-mode flyspell-correct flycheck magit git-commit with-editor json-mode tablist magit-popup docker-tramp json-snatcher json-reformat web-completion-data dash-functional tern pos-tip ghc haskell-mode company inflections edn multiple-cursors paredit peg cider queue clojure-mode yasnippet alert log4e gntp auto-complete sql-indent eww-lnum yaml-mode xterm-color ws-butler writeroom-mode window-numbering which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package toc-org tagedit spacemacs-theme spaceline solarized-theme smeargle slim-mode slack shell-pop scss-mode sass-mode restclient restart-emacs rainbow-delimiters quelpa pug-mode psci psc-ide popwin persp-mode pcre2el paradox orgit org-projectile org-present org-pomodoro org-plus-contrib org-download org-bullets open-junk-file ob-http neotree multi-term move-text mmm-mode markdown-toc magit-gitflow macrostep lorem-ipsum livid-mode linum-relative link-hint less-css-mode js2-refactor js-doc intero insert-shebang info+ indent-guide ido-vertical-mode hungry-delete htmlize hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-purpose helm-projectile helm-mode-manager helm-make helm-hoogle helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag haskell-snippets google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md flyspell-correct-helm flycheck-pos-tip flycheck-haskell flycheck-flow flycheck-elm flx-ido fish-mode fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eshell-z eshell-prompt-extras esh-help emmet-mode elm-mode elisp-slime-nav editorconfig dumb-jump dockerfile-mode docker define-word company-web company-tern company-statistics company-shell company-quickhelp company-ghci company-ghc company-flow company-cabal column-enforce-mode coffee-mode cmm-mode clojure-snippets clj-refactor clean-aindent-mode cider-eval-sexp-fu auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
