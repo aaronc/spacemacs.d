@@ -18,6 +18,10 @@ values."
    ;; of a list then all discovered layers will be installed.
    dotspacemacs-configuration-layers
    '(
+     ranger
+     ruby
+     python
+     csv
      typescript
      ;; ----------------------------------------------------------------
      ;; Example of useful layers you may want to use right away.
@@ -41,13 +45,15 @@ values."
      purescript
      clojure
      elm
-     (shell :variables shell-default-shell 'eshell)
+     (shell :variables shell-default-shell 'ansi-term)
      slack
      github
      scala
      idris
      purescript
      nixos
+     ;; ocaml
+     symon
      )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
@@ -57,7 +63,16 @@ values."
    '(writeroom-mode
      editorconfig
      eww-lnum
-     babel-repl)
+     babel-repl
+     ;; vcl-mode
+     ;; (reason-mode
+     ;;  :location (recipe
+     ;;             :repo "facebook/reason"
+     ;;             :fetcher github
+     ;;             :files ("editorSupport/emacs/reason-mode.el"
+     ;;                     "editorSupport/emacs/refmt.el"
+     ;;                     )))
+     )
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages '()
    ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
@@ -266,7 +281,8 @@ layers configuration.
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
-  (global-set-key (kbd "M-a") 'helm-mini)
+  (setq confirm-kill-emacs 'y-or-n-p)
+  (global-set-key (kbd "M-a") 'helm-projectile-switch-to-buffer)
   (global-set-key (kbd "C-x C-f") 'helm-find-files)
   (global-set-key (kbd "M-/") 'comment-or-uncomment-region)
   (global-set-key (kbd "C-S-s") 'save-buffer)
@@ -285,7 +301,7 @@ you should place your code here."
   (spaceline-toggle-buffer-size-off)
   ;; (customize-set-variable 'intero-package-version "0.1.16")
   ;; (setq golden-ratio-adjust-factor 1.2)
-  (setq cider-boot-parameters "repl -s watch refresh")
+  ;; (setq cider-boot-parameters "repl -s watch refresh")
   ;; (setq-default dotspacemacs-configuration-layers
   ;;               '(auto-completion
   ;;                 (haskell :variables haskell-completion-backend 'intero)))
@@ -313,8 +329,15 @@ you should place your code here."
 
   (spacemacs/toggle-golden-ratio-on)
 
-  (setq js2-basic-offset 2)
-  (setq js2-bounce-indent-p t)
+  (setq-default js2-basic-offset 2
+                js-indent-level 2
+                js2-bounce-indent-p t
+                )
+
+  ;; (eval-after-load "cider"
+  ;;   '(progn
+  ;;      (spacemacs/set-leader-keys-for-major-mode cider-mode "ep"  'cider-pprint-eval-defun-at-point)
+  ;;      )
 
 
   ;; (flycheck-add-mode 'javascript-eslint 'js2-mode)
@@ -355,12 +378,45 @@ you should place your code here."
  '(evil-want-Y-yank-to-eol t)
  '(package-selected-packages
    (quote
-    (hydra cider seq spinner request powerline company-nixos-options nix-mode helm-nixos-options nixos-options circe websocket org flyspell-correct auto-complete multiple-cursors clojure-mode iedit smartparens highlight yasnippet projectile company helm helm-core async dash visual-fill-column restclient-helm ob-restclient company-restclient know-your-http-well tide typescript-mode idris-mode prop-menu noflet ensime sbt-mode scala-mode babel-repl window-purpose imenu-list nginx-mode solarized-theme magit-gh-pulls github-search github-clone github-browse-file gist gh marshal logito pcache phpunit phpcbf php-auto-yasnippets drupal-mode php-extras php-mode markdown-mode skewer-mode simple-httpd js2-mode haml-mode gitignore-mode flycheck magit git-commit with-editor json-mode tablist magit-popup docker-tramp json-snatcher json-reformat web-completion-data tern ghc haskell-mode packed flycheck-flow company-flow yaml-mode xterm-color ws-butler writeroom-mode window-numbering which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package toc-org tagedit sql-indent spacemacs-theme spaceline smeargle slim-mode slack shell-pop scss-mode sass-mode restclient restart-emacs rainbow-delimiters quelpa pug-mode psci psc-ide popwin persp-mode pcre2el paradox orgit org-projectile org-present org-pomodoro org-plus-contrib org-download org-bullets open-junk-file ob-http neotree multi-term move-text mmm-mode markdown-toc magit-gitflow macrostep lorem-ipsum livid-mode linum-relative link-hint less-css-mode js2-refactor js-doc intero insert-shebang info+ indent-guide ido-vertical-mode hungry-delete htmlize hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-purpose helm-projectile helm-mode-manager helm-make helm-hoogle helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag haskell-snippets google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md flyspell-correct-helm flycheck-pos-tip flycheck-haskell flycheck-elm flx-ido fish-mode fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell eww-lnum evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eshell-z eshell-prompt-extras esh-help emmet-mode elm-mode elisp-slime-nav editorconfig dumb-jump dockerfile-mode docker define-word company-web company-tern company-statistics company-shell company-quickhelp company-ghci company-ghc company-cabal column-enforce-mode coffee-mode cmm-mode clojure-snippets clj-refactor clean-aindent-mode cider-eval-sexp-fu auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
+    (utop tuareg caml ocp-indent merlin evil package-build vcl-mode emojify inflections bind-map csv-mode hydra cider seq spinner request powerline company-nixos-options nix-mode helm-nixos-options nixos-options circe websocket org flyspell-correct auto-complete multiple-cursors clojure-mode iedit smartparens highlight yasnippet projectile company helm helm-core async dash visual-fill-column restclient-helm ob-restclient company-restclient know-your-http-well tide typescript-mode idris-mode prop-menu noflet ensime sbt-mode scala-mode babel-repl window-purpose imenu-list nginx-mode solarized-theme magit-gh-pulls github-search github-clone github-browse-file gist gh marshal logito pcache phpunit phpcbf php-auto-yasnippets drupal-mode php-extras php-mode markdown-mode skewer-mode simple-httpd js2-mode haml-mode gitignore-mode flycheck magit git-commit with-editor json-mode tablist magit-popup docker-tramp json-snatcher json-reformat web-completion-data tern ghc haskell-mode packed flycheck-flow company-flow yaml-mode xterm-color ws-butler writeroom-mode window-numbering which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package toc-org tagedit sql-indent spacemacs-theme spaceline smeargle slim-mode slack shell-pop scss-mode sass-mode restclient restart-emacs rainbow-delimiters quelpa pug-mode psci psc-ide popwin persp-mode pcre2el paradox orgit org-projectile org-present org-pomodoro org-plus-contrib org-download org-bullets open-junk-file ob-http neotree multi-term move-text mmm-mode markdown-toc magit-gitflow macrostep lorem-ipsum livid-mode linum-relative link-hint less-css-mode js2-refactor js-doc intero insert-shebang info+ indent-guide ido-vertical-mode hungry-delete htmlize hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-purpose helm-projectile helm-mode-manager helm-make helm-hoogle helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag haskell-snippets google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md flyspell-correct-helm flycheck-pos-tip flycheck-haskell flycheck-elm flx-ido fish-mode fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell eww-lnum evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eshell-z eshell-prompt-extras esh-help emmet-mode elm-mode elisp-slime-nav editorconfig dumb-jump dockerfile-mode docker define-word company-web company-tern company-statistics company-shell company-quickhelp company-ghci company-ghc company-cabal column-enforce-mode coffee-mode cmm-mode clojure-snippets clj-refactor clean-aindent-mode cider-eval-sexp-fu auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
  '(psc-ide-add-import-on-completion t t)
- '(psc-ide-rebuild-on-save nil t))
+ '(psc-ide-rebuild-on-save nil t)
+ '(vcl-indent-level 2))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+(defun dotspacemacs/emacs-custom-settings ()
+  "Emacs custom settings.
+This is an auto-generated function, do not modify its content directly, use
+Emacs customize menu instead.
+This function is called at the very end of Spacemacs initialization."
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(ansi-color-names-vector
+   ["#d2ceda" "#f2241f" "#67b11d" "#b1951d" "#3a81c3" "#a31db1" "#21b8c7" "#655370"])
+ '(evil-want-Y-yank-to-eol t)
+ '(package-selected-packages
+   (quote
+    (ranger utop tuareg caml ocp-indent merlin evil package-build vcl-mode emojify inflections bind-map csv-mode hydra cider seq spinner request powerline company-nixos-options nix-mode helm-nixos-options nixos-options circe websocket org flyspell-correct auto-complete multiple-cursors clojure-mode iedit smartparens highlight yasnippet projectile company helm helm-core async dash visual-fill-column restclient-helm ob-restclient company-restclient know-your-http-well tide typescript-mode idris-mode prop-menu noflet ensime sbt-mode scala-mode babel-repl window-purpose imenu-list nginx-mode solarized-theme magit-gh-pulls github-search github-clone github-browse-file gist gh marshal logito pcache phpunit phpcbf php-auto-yasnippets drupal-mode php-extras php-mode markdown-mode skewer-mode simple-httpd js2-mode haml-mode gitignore-mode flycheck magit git-commit with-editor json-mode tablist magit-popup docker-tramp json-snatcher json-reformat web-completion-data tern ghc haskell-mode packed flycheck-flow company-flow yaml-mode xterm-color ws-butler writeroom-mode window-numbering which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package toc-org tagedit sql-indent spacemacs-theme spaceline smeargle slim-mode slack shell-pop scss-mode sass-mode restclient restart-emacs rainbow-delimiters quelpa pug-mode psci psc-ide popwin persp-mode pcre2el paradox orgit org-projectile org-present org-pomodoro org-plus-contrib org-download org-bullets open-junk-file ob-http neotree multi-term move-text mmm-mode markdown-toc magit-gitflow macrostep lorem-ipsum livid-mode linum-relative link-hint less-css-mode js2-refactor js-doc intero insert-shebang info+ indent-guide ido-vertical-mode hungry-delete htmlize hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-purpose helm-projectile helm-mode-manager helm-make helm-hoogle helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag haskell-snippets google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md flyspell-correct-helm flycheck-pos-tip flycheck-haskell flycheck-elm flx-ido fish-mode fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell eww-lnum evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eshell-z eshell-prompt-extras esh-help emmet-mode elm-mode elisp-slime-nav editorconfig dumb-jump dockerfile-mode docker define-word company-web company-tern company-statistics company-shell company-quickhelp company-ghci company-ghc company-cabal column-enforce-mode coffee-mode cmm-mode clojure-snippets clj-refactor clean-aindent-mode cider-eval-sexp-fu auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
+ '(psc-ide-add-import-on-completion t t)
+ '(psc-ide-rebuild-on-save nil t)
+ '(safe-local-variable-values
+   (quote
+    ((cider-cljs-lein-repl . "(do (require 'figwheel-sidecar.repl-api)
+           (figwheel-sidecar.repl-api/start-figwheel!)
+           (figwheel-sidecar.repl-api/cljs-repl))"))))
+ '(sql-postgres-program "psql")
+ '(vcl-indent-level 2))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+)
